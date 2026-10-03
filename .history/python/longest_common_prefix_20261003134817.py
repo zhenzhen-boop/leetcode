@@ -7,8 +7,6 @@ class Solution:
         min_element = min(strs,key = lambda x: len(x))
         max_common_str = "" 
         idx = 0
-        
-        
         if len(strs) == 1:
             return max_common_str
 
