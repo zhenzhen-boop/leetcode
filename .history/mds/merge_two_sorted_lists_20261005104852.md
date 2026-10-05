@@ -1,13 +1,30 @@
+# Intuition
+<!-- Describe your first thoughts on how to solve this problem. -->
+先頭ノードを比較していき、小さいほうのノードを入れていく。
+# Approach
+<!-- Describe your approach to solving the problem. -->
+上に同じ
+リスト構造に慣れていないのが反省
+
+# Complexity
+- Time complexity:
+<!-- Add your time complexity here, e.g. $$O(n)$$ -->
+リストのノード数をnとすると、O(n)で与えられる。
+
+- Space complexity:
+<!-- Add your space complexity here, e.g. $$O(n)$$ -->
+O(n)ですか？
+# Code
+```python3 []
 # Definition for singly-linked list.
-class ListNode:
-   def __init__(self, val=0, next=None):
-       self.val = val
-       self.next = next
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
 
 class Solution:
     def mergeTwoLists(self, list1: ListNode | None, list2: ListNode | None) -> ListNode | None:
         # 両方Noneだったら...??
-        # リストに慣れていないのが反省
 
         if list1 == None:
             return list2
@@ -60,7 +77,4 @@ class Solution:
                 
             
         return  merged_list_head
-            
-            
-def main():
-    print(f"{Solution().mergeTwoLists()}")            
+```
