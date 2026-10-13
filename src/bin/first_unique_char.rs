@@ -35,6 +35,10 @@ impl Solution {
         return -1;
     }
 }
+
+fn main(){
+    println!("{}",Solution::first_uniq_char("inunu".to_string()));
+}
         
         
         /*没

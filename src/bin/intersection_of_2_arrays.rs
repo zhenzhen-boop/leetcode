@@ -1,4 +1,4 @@
-struct Solution{};
+struct Solution{}
 
 impl Solution {
     pub fn intersection(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
@@ -29,4 +29,11 @@ impl Solution {
         
         
     }
+}
+fn main(){
+
+    let nums1 = vec![1,2,3];
+    let nums2 = vec![6,5,4,3,2];
+
+    println!("{:?}",Solution::intersection(nums1, nums2));
 }

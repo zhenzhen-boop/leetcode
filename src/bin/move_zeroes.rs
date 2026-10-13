@@ -33,3 +33,11 @@ impl Solution {
         return;
     }
 }
+
+
+fn main(){
+
+    let  mut nums = vec![1,2,3];
+
+    println!("{:?}",Solution::move_zeroes(& mut nums));
+}
