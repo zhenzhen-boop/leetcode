@@ -37,3 +37,6 @@ fn main(){
 
     println!("{:?}",Solution::intersection(nums1, nums2));
 }
+
+
+
