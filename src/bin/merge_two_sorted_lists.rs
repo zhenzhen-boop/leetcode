@@ -43,8 +43,8 @@ impl ListNode { // ListNodeっていう構造体にかけるメソッド
    #[inline]
    fn new(val: i32) -> Self { // 新しいリストノードを作成
      ListNode {
-       next: None,
-       val
+       val,
+       next:None
      }
    }
 }
@@ -60,19 +60,81 @@ impl Solution {
 
         let mut ptr1 = list1;
         let mut ptr2 = list2;
-        let mut merged_ptr : Option<Box<ListNode>> = None;
 
         // dummyというリストノードを作り、tailという可変参照でいじる
         // 返すのはdummy.next
         let mut dummy = ListNode::new(0);
         // これならptr1,2みたいにOption<Box<ListNode>>型じゃないからListNodeに直接アクセスできる
-        let mut tail = &mut dummy; // taile.next == (*tail).nextになる
+        let mut tail = &mut dummy; // tail.next == (*tail).nextになる
+        let mut node : Box<ListNode> ;
 
 
         // ptr1.unwrap().val > ptr2.unwrap().val は、ptr1、2の所有権を奪ってしまう。(ptr1、2がもう使えなくなってしまう)
         // as_ref()を使うと所有権を奪うことなくunwrap()ができる
+
+        // take() は、値を取り出す対象を変更できる必要がある。しかし、as_ref() の後は不変参照になっているので、そこから take() することはできない。
+        // つまり、値を比較するときは as_ref()、所有権を移動するときは take() と使い分けよう。
+        /*
+        unwrap()：Option<T> から T を取り出す。
+
+        take()：値を取り出し、元の場所を None にする。
+
+        as_ref()：中身を参照して、所有権を移動せずに扱う。
+         */
         if ptr1.as_ref().unwrap().val > ptr2.as_ref().unwrap().val{
-            tail.next = 
+            // tail = ptr2.as_ref().unwrap().take(); // これはas_ref()の後にunwrap()したものをtake()でNoneに使用としているからダメ
+            // tail.next = ptr2.take().unwrap()でここでunwrap()を付けると左辺はOptionなのが一致しなくなる
+            node = ptr2.take().unwrap();
+            ptr2 = node.next.take(); // nodeの後ろのリストだけをptr2に渡す
+            tail.next = Some(node); // tailはListNode,tail.nextはOption<Box<ListNode>>
+            tail = tail.next.as_mut().unwrap(); 
+
+            // nodeを作ることで、ptr1,2だとその後ろのリストもすべて持ってきてしまうから、先頭ノードとその後ろのノードを分離したい。
+            // node.nextをNoneにすることで、それが叶う。
+        }
+
+        else{
+            node = ptr1.take().unwrap();
+            ptr1 = node.next.take();
+            tail.next = Some(node);
+            tail = tail.next.as_mut().unwrap();
+        }
+
+
+        while ptr1 != None || ptr2 != None{
+
+            if ptr2 == None{
+                node = ptr1.take().unwrap();
+                ptr1 = node.next.take();
+                tail.next = Some(node);
+                
+                // if ptr1 != None // このif文もいらない、なぜならwhile文の条件式より両方がNoneのことはないから
+            }
+
+            else if ptr1 == None{
+                node = ptr2.take().unwrap();
+                // ptr2 = node.next.take();ここでtake()を付けないと、構造体のフィールドの所有権が移ると構造体自体の所有権が移る。
+                // そうすると下のSome(node)でエラーが出る
+                ptr2 = node.next.take(); 
+                tail.next = Some(node);
+            }
+
+            else if ptr1.as_ref().unwrap().val > ptr2.as_ref().unwrap().val{
+                node = ptr2.take().unwrap();
+                ptr2 = node.next.take();
+                tail.next = Some(node);
+            }
+
+            else if ptr2.as_ref().unwrap().val >= ptr1.as_ref().unwrap().val{
+                node = ptr1.take().unwrap();
+                ptr1 = node.next.take();
+                tail.next = Some(node);
+            }
+
+            // tailは&mut ListNodeだからas_mut()でmutにする。
+            tail = tail.next.as_mut().unwrap();
+        }
+
             // merged_ptr = ptr2; // これも所有権を持っていってしまう。
             // ptr2 = ptr2.next; 
             // これをすると、ptr2.nextの、ptr2への所有権の移動が起こる。
@@ -100,17 +162,26 @@ impl Solution {
             
              */
 
+             return dummy.next
         }
 
-        else{
-            //merged_ptr = ptr1;
-            ptr1 = ptr1.as_ref().unwrap().next.take();
-        }
+
 
     }
-}
+
 
 
 fn main(){
-    Solution::merge_two_lists();
+    // 前提として二つのリストはsortされている。
+    let list1 = Some(Box::new(ListNode{val:2,
+        next:Some(Box::new(ListNode{val:4,
+            next:Some(Box::new(ListNode{val:6,
+                next:None}))}))}));
+
+    let list2 = Some(Box::new(ListNode{val:1,
+        next:Some(Box::new(ListNode{val:3,
+            next:Some(Box::new(ListNode{val:5,
+                next:None}))}))}));
+
+    println!("{:?}",Solution::merge_two_lists(list1,list2));
 }

@@ -1,0 +1,131 @@
+Rust：連結リストのマージで node を作る理由
+1. node を作るモチベーション
+
+先頭ノードだけをマージ先に移し、残りのリストは元のポインタに残したいから。
+
+例えば、次のリストがあるとする。
+
+ptr1
+ ↓
+[1] → [3] → [5] → None
+
+
+ptr1 は先頭の [1] だけでなく、[1] → [3] → [5] というリスト全体の所有権を持っている。
+
+ここで、
+
+tail.next = ptr1.take();
+
+
+とすると、リスト全体が tail.next に移動してしまう。
+
+今回やりたいのは、先頭の [1] だけをマージ先に移し、残りの [3] → [5] は ptr1 に残すこと。
+
+そのため、node という一時変数を作り、先頭ノードと残りのリストを切り離す。
+
+2. node を使った処理
+let mut node = ptr1.take().unwrap();
+ptr1 = node.next.take();
+tail.next = Some(node);
+
+STEP 1：先頭ノードを node に取り出す
+let mut node = ptr1.take().unwrap();
+
+
+ptr1.take() は、ptr1 が持つ Option<Box<ListNode>> を取り出し、元の ptr1 を None にする。
+
+unwrap() で Option の中身である Box<ListNode> を取り出す。
+
+この時点では、node は先頭ノードだけでなく、その先につながるリスト全体を所有している。
+
+ptr1 = None
+
+node
+ ↓
+[1] → [3] → [5] → None
+
+STEP 2：先頭ノードと残りのリストを切り離す
+ptr1 = node.next.take();
+
+
+node.next.take() は、node.next が持つリストを取り出し、元の node.next を None にする。
+
+node
+ ↓
+[1] → None
+
+ptr1
+ ↓
+[3] → [5] → None
+
+
+これで、node は先頭ノードだけを持ち、ptr1 は残りのリストを持つ。
+
+STEP 3：先頭ノードだけをマージ先につなぐ
+tail.next = Some(node);
+
+
+node を Some(node) で包み、tail.next に接続する。
+
+dummy → [1] → None
+
+ptr1
+ ↓
+[3] → [5] → None
+
+
+これで、マージ先には先頭ノードだけがつながり、残りのリストは ptr1 に残る。
+
+STEP 4：tail を次のノードへ進める
+tail = tail.next.as_mut().unwrap();
+
+
+tail.next の中身を可変参照で借り、そのノードを新しい tail にする。
+
+dummy → [1] → None
+         ↑
+        tail
+
+ptr1
+ ↓
+[3] → [5] → None
+
+
+次のノードを接続するときは、この tail の位置からつないでいく。
+
+3. なぜ tail.next.take() ではダメなのか？
+
+次のコードは問題がある。
+
+tail.next = ptr1.take();
+ptr1 = tail.next.take();
+
+ptr1.take() でリスト全体を取り出し、tail.next に移す。
+tail.next.take() で、今つないだリスト全体を再び取り出す。
+tail.next は None になる。
+
+つまり、せっかくマージ先につないだリストを取り外してしまう。
+
+node を使うことで、マージ先につなぐノードと、次の処理に回すリストを別々に管理できる。
+
+4. 自分でコードを書くときの考え方
+
+連結リストを操作するときは、次の3点を考える。
+
+何を移動したい？
+今回は先頭ノード1個。
+何を残したい？
+残りのリスト。
+移動する前に、次のノードへのつながりを確保した？
+node.next.take() で残りのリストを確保する。
+
+このように考えると、先頭ノードを一時的に保持する node が必要だとわかる。
+
+5. メソッドの役割
+メソッド	役割
+take()	値を取り出し、元の場所を None にする
+unwrap()	Option<T> から T を取り出す。None ならパニック
+as_ref()	中身を不変参照で借りる
+as_mut()	中身を可変参照で借りる
+
+重要： take() は所有権を移動するための操作。unwrap() は Option の中身を取り出す操作。両者の役割は異なる。
