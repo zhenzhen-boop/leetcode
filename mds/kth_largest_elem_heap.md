@@ -1,7 +1,3 @@
-以下をそのまま `heapq_kth_largest.md` という名前で保存してね。
-
-文章作成
-
 # Python `heapq` と KthLargest のまとめ
 
 ## 1\. `heapq` とは？
