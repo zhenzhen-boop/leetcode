@@ -3,7 +3,8 @@ struct Solution{}
 impl Solution {
     pub fn convert(s: String, num_rows: i32) -> String {
 
-        if num_rows == 1 || num_rows >= s.len() as i32{
+        if num_rows == 1 || num_rows >= s.chars().count() as i32{ 
+            // s.len()だとバイト数を返すから日本語だと良くない-> s.chars().count()のほうがいい
             return s;
         }
         let num_rows_usize:usize = num_rows as usize;
@@ -14,10 +15,12 @@ impl Solution {
         let mut step : usize = 2; // usizeはi32のように負の値は取れないから、idx = のところに-1を混ぜて調整する。だからstepは2スタートなことに注意
         let mut idx : usize = 0;
         
-
+        // 本当はs.chars()だけでいいらしい
         for (_,ch) in s.chars().enumerate(){
 
-            arr[idx] = arr[idx].clone() + &(ch.to_string()); // ここにclone()を入れなきゃいけないらしい
+            arr[idx].push(ch); // clone()使うから遅くなるんじゃない？-> これpushでいいやん
+
+            //arr[idx] = arr[idx].clone() + &(ch.to_string()); // ここにclone()を入れなきゃいけないらしい
 
             //println!("{:?}",arr);
 
@@ -33,7 +36,8 @@ impl Solution {
         }
 
         // let ans = arr.concat(); // でもできるけど、join()だと区切る文字を指定できる
-        let ans = arr.join("").to_string();
+        // let ans = arr.join("").to_string();
+        let ans = arr.join(""); // to_string()は要らないらしい
 
         return ans;
 
